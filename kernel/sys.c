@@ -295,14 +295,23 @@ int sys_execve2(const char *name){
 	printk("Hello from sys_execve2\n");
 }
 
-int sys_getdents(const char *name){
+int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
+	
 	printk("Hello from sys_getdents\n");
 }
-
+int sys_foreze(const char *name){
+	printk("Hello from sys_foreze\n");
+}
 int sys_sleep(unsigned int seconds){
-	printk("Hello from sys_sleep\n");
+	int ret;
+	sys_signal(SIGALRM,1,NULL);
+	if((ret=sys_alarm(seconds))<0) return -1;
+	sys_pause();
+	if((ret=sys_alarm(0))<0)return -1;
+	return ret;
 }
 
-long sys_getcwd(const char *name){
+long sys_getcwd(char *buf,size_t size){
+	
 	printk("Hello from sys_getcwd\n");
 }
