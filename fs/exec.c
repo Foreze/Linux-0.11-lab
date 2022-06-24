@@ -360,6 +360,7 @@ exec_error1:
 
 extern ex2_do_no_page();
 
+// 大部分和do_execve一致，最后添加了提前分配页面的代码
 int do_execve2(unsigned long * eip,long tmp,char * filename,
 	char ** argv, char ** envp)
 {
@@ -525,7 +526,7 @@ restart_interp:
 	eip[0] = ex.a_entry;		/* eip, magic happens :-) */
 	eip[3] = p;			/* stack pointer */
 
-	// 分配页面
+	// 在new到last间分配页面
 	unsigned long new=current->start_code;
 	unsigned long last=(current->start_code+current->brk-1)&0xfffff000;
 	do{

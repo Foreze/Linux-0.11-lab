@@ -284,6 +284,7 @@ parallel_interrupt:
 	popl %eax
 	iret
 
+// 和sys_execve一致
 .align 4
 sys_execve2:
 	lea EIP(%esp),%eax

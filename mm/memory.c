@@ -430,6 +430,7 @@ void calc_mem(void)
 	}
 }
 
+// do_no_page复制粘贴，删除error_code这个参数
 void ex2_do_no_page(unsigned long address){
 	int nr[4];
 	unsigned long tmp;
