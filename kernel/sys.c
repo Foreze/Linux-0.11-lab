@@ -297,7 +297,7 @@ struct linux_dirent{
 	long d_ino;
 	off_t d_off;
 	unsigned short d_reclen;
-	char d_name[];
+	char d_name[10];
 };
 struct getdents_callback {
 	struct linux_dirent * current_dir;
