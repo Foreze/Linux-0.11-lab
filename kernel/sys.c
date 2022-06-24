@@ -307,10 +307,40 @@ struct getdents_callback {
 };
 // bread读数据块fd再按一定格式返回
 int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
-	char *buf;
-	sys_read(fd,buf,count);
-	printk("Hello from sys_getdents\n");
-	return 0;
+	//char *buf;
+	int entries;
+	int block,i,j;
+	struct buffer_head * bh;
+	struct dir_entry * de;
+	struct super_block * sb;
+	struct m_inode ** dir= &current->filp[fd]->f_inode;
+	struct linux_dirent *buf=dirp;
+	// sys_read(fd,buf,count);
+	// printk("Hello from sys_getdents\n");
+	if (!(block = (*dir)->i_zone[0]))
+		return NULL;
+	if (!(bh = bread((*dir)->i_dev,block)))
+		return NULL;
+	i = 0;
+	de = (struct dir_entry *) bh->b_data;
+	while (i < entries) {
+		if ((char *)de >= BLOCK_SIZE+bh->b_data) {
+			brelse(bh);
+			bh = NULL;
+			if (!(block = bmap(*dir,i/DIR_ENTRIES_PER_BLOCK)) ||
+			    !(bh = bread((*dir)->i_dev,block))) {
+				i += DIR_ENTRIES_PER_BLOCK;
+				continue;
+			}
+			de = (struct dir_entry *) bh->b_data;
+		}
+		// if (match(namelen,name,de)) {
+		// 	*res_dir = de;
+		// 	return bh;
+		// }
+	}
+	brelse(bh);
+	return (buf-dirp)*sizeof(struct linux_dirent);
 	// struct file *file;
 	// struct linux_dirent *lastdirent;
 	// struct getdents_callback buf;
@@ -332,7 +362,6 @@ int sys_sleep(unsigned int seconds){
 	sys_signal(SIGALRM,1,NULL);
 	if((ret=sys_alarm(seconds))<0) return -1;
 	sys_pause();
-	if((ret=sys_alarm(0))<0)return -1;
 	return ret;
 }
 #define BUF_MAX 4096
