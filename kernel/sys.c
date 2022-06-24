@@ -296,7 +296,7 @@ extern int sys_execve2();
 struct linux_dirent{
 	long d_ino;
 	off_t d_off;
-	unsigned short d_reclean;
+	unsigned short d_reclen;
 	char d_name[];
 };
 struct getdents_callback {
@@ -338,6 +338,17 @@ int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
 		// 	*res_dir = de;
 		// 	return bh;
 		// }
+		// 内核态和用户态之间的读写需要put_fs_xxx函数
+		put_fs_long(0,&buf->d_off);
+		put_fs_long(de->inode,&buf->d_ino);
+		put_fs_byte(sizeof(struct linux_dirent),&buf->d_reclen);
+		for(j=0;j<strlen(de->name);j++){
+			put_fs_byte(de->name[j],&buf->d_name[j]);
+		}
+		put_fs_byte(0,&buf->d_name[j]);
+		buf++;
+		de++;
+		i++;
 	}
 	brelse(bh);
 	return (buf-dirp)*sizeof(struct linux_dirent);
