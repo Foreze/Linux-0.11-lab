@@ -315,6 +315,7 @@ int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
 	struct super_block * sb;
 	struct m_inode ** dir= &current->filp[fd]->f_inode;
 	struct linux_dirent *buf=dirp;
+	entries=(*dir)->i_size/sizeof(struct dir_entry);
 	// sys_read(fd,buf,count);
 	// printk("Hello from sys_getdents\n");
 	if (!(block = (*dir)->i_zone[0]))
