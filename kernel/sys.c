@@ -291,13 +291,38 @@ int sys_umask(int mask)
 	return (old);
 }
 
-int sys_execve2(const char *name){
-	printk("Hello from sys_execve2\n");
-}
+extern int sys_execve2();
 
+struct linux_dirent{
+	long d_ino;
+	off_t d_off;
+	unsigned short d_reclean;
+	char d_name[];
+};
+struct getdents_callback {
+	struct linux_dirent * current_dir;
+	struct linux_dirent * previous;
+	int count;
+	int error;
+};
+// bread读数据块fd再按一定格式返回
 int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
-	
+	char *buf;
+	sys_read(fd,buf,count);
 	printk("Hello from sys_getdents\n");
+	return 0;
+	// struct file *file;
+	// struct linux_dirent *lastdirent;
+	// struct getdents_callback buf;
+	// buf.current_dir =dirp;
+	// buf.previous = NULL;
+	// buf.count = count;
+	// buf.error = 0;
+	// lastdirent = buf.previous;
+	// if (!lastdirent)
+	// 	return buf.error;
+	// return count - buf.count;
+	// printk("Hello from sys_getdents\n");
 }
 int sys_foreze(const char *name){
 	printk("Hello from sys_foreze\n");
@@ -310,8 +335,15 @@ int sys_sleep(unsigned int seconds){
 	if((ret=sys_alarm(0))<0)return -1;
 	return ret;
 }
-
+#define BUF_MAX 4096
 long sys_getcwd(char *buf,size_t size){
+	// char path[BUF_MAX],cwd[BUF_MAX];
+	// struct linux_dirent *dirp;
+	// struct m_inode sb,sb_d,sb_1;
+	// unsigned short dev;
+	// long ino;
+
 	
+	//current->pwd;
 	printk("Hello from sys_getcwd\n");
 }
