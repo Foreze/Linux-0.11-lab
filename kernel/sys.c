@@ -376,12 +376,41 @@ int sys_sleep(unsigned int seconds){
 	sys_pause();
 	return ret;
 }
-#define BUF_MAX 4096
+#define BUF_MAX 100
 long sys_getcwd(char *buf,size_t size){
+	char path1[BUF_MAX]={0},path2[BUF_MAX]={0};
 	struct m_inode *inode =current->pwd;
+	struct m_inode *cur_inode;
 	struct buffer_head *bh=bread(current->root->i_dev,inode->i_zone[0]);
 	struct dir_entry *dir = (struct dir_entry *)bh ->b_data;
-	int i,j;
+	unsigned short tmp;
+	int i;
+	while(i!=1){
+		tmp=dir->inode;
+		cur_inode=iget(current->root->i_dev,(dir+1)->inode);
+		bh=bread(current->root->i_dev,cur_inode->i_zone[0]);
+		dir=(struct dir_entry*) bh->b_data;
+		i=1;
+		while (1)
+		{
+			if((dir+i)->inode==tmp)break;
+			i++;
+		}
+		if(i==1){
+			break;
+		}
+		strcpy(path1,"/");
+		strcat(path1,(dir+i)->name);
+		//printk("path1:%s\n",path1);
+		strcat(path1,path2);
+		strcpy(path2,path1);
+		//printk("path2:%s\n",path2);
+	}
+	char *p1=path2,*p2=buf;
+	for(i=0;i<size;i++){
+		put_fs_byte(*(p1+i),p2+i);
+	}
+	return buf;
 
 	printk("Hello from sys_getcwd\n");
 }
