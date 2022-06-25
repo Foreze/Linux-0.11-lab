@@ -378,13 +378,10 @@ int sys_sleep(unsigned int seconds){
 }
 #define BUF_MAX 4096
 long sys_getcwd(char *buf,size_t size){
-	// char path[BUF_MAX],cwd[BUF_MAX];
-	// struct linux_dirent *dirp;
-	// struct m_inode sb,sb_d,sb_1;
-	// unsigned short dev;
-	// long ino;
+	struct m_inode *inode =current->pwd;
+	struct buffer_head *bh=bread(current->root->i_dev,inode->i_zone[0]);
+	struct dir_entry *dir = (struct dir_entry *)bh ->b_data;
+	int i,j;
 
-	
-	//current->pwd;
 	printk("Hello from sys_getcwd\n");
 }
