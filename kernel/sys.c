@@ -305,7 +305,7 @@ struct getdents_callback {
 	int count;
 	int error;
 };
-// bread读数据块fd再按一定格式返回
+// 利用find_entry中的部分代码遍历目录项
 int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
 	//char *buf;
 	int entries;
@@ -369,6 +369,7 @@ int sys_getdents(unsigned int fd,struct linux_dirent *dirp,unsigned int count){
 int sys_foreze(const char *name){
 	printk("Hello from sys_foreze\n");
 }
+// 三个系统调用函数
 int sys_sleep(unsigned int seconds){
 	int ret;
 	sys_signal(SIGALRM,1,NULL);
@@ -378,11 +379,17 @@ int sys_sleep(unsigned int seconds){
 }
 #define BUF_MAX 100
 long sys_getcwd(char *buf,size_t size){
+	// 存储路径名的变量
 	char path1[BUF_MAX]={0},path2[BUF_MAX]={0};
+	// 当前工作目录地址
 	struct m_inode *inode =current->pwd;
+	// 遍历时目录项地址
 	struct m_inode *cur_inode;
+	// 一个指向缓冲头的指针
 	struct buffer_head *bh=bread(current->root->i_dev,inode->i_zone[0]);
+	// bh中的第一个逻辑块
 	struct dir_entry *dir = (struct dir_entry *)bh ->b_data;
+	// 暂存过程中的dir_entry中的inode
 	unsigned short tmp;
 	int i;
 	while(i!=1){
@@ -399,6 +406,7 @@ long sys_getcwd(char *buf,size_t size){
 		if(i==1){
 			break;
 		}
+		// path1当前目录，path2总目录
 		strcpy(path1,"/");
 		strcat(path1,(dir+i)->name);
 		//printk("path1:%s\n",path1);
@@ -406,6 +414,7 @@ long sys_getcwd(char *buf,size_t size){
 		strcpy(path2,path1);
 		//printk("path2:%s\n",path2);
 	}
+	// 将path2的内容写入buf中
 	char *p1=path2,*p2=buf;
 	for(i=0;i<size;i++){
 		put_fs_byte(*(p1+i),p2+i);
